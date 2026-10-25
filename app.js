@@ -7,10 +7,45 @@ const digits=n=>String(n).replace(/\d/g,d=>'০১২৩৪৫৬৭৮৯'[+d])
 const categories={all:'সব ১০৯টি শব্দ',greeting:'শুভেচ্ছা',basic:'প্রাথমিক শব্দ',people:'মানুষ ও পরিচয়',questions:'প্রশ্নবোধক',food:'খাবার ও পানীয়',home:'বাড়ি',travel:'যাতায়াত',time:'সময়',verbs:'ক্রিয়া',work:'কাজ'};
 function visibleWords(){return raw.filter(w=>(deck==='all'||w.cat===deck)&&(!searchTerm||[w.pt,w.pron,w.bn].join(' ').toLowerCase().includes(searchTerm.toLowerCase())));}
 function speak(text){
-  // Try the secure OpenAI speech endpoint on the companion Hatchable project first.
-  fetch('https://portugues-europeu.hatchable.site/api/audio',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})})
-  .then(async r=>{if(!r.ok)throw new Error('AI audio not configured');const type=r.headers.get('content-type')||'';if(!type.includes('audio'))throw new Error('No audio');const blob=await r.blob();const audio=new Audio(URL.createObjectURL(blob));await audio.play();})
-  .catch(()=>{if(!('speechSynthesis'in window)){alert('এই ব্রাউজারে অডিও সুবিধা নেই।');return;}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='pt-PT';u.rate=.82;const voices=speechSynthesis.getVoices();const v=voices.find(x=>x.lang.toLowerCase()==='pt-pt')||voices.find(x=>x.lang.toLowerCase().startsWith('pt'));if(v)u.voice=v;speechSynthesis.speak(u);});
+  // Free browser/device speech only: no API key, external endpoint, or network request.
+  if (!('speechSynthesis' in window) || !('SpeechSynthesisUtterance' in window)) {
+    alert('এই ব্রাউজারে টেক্সট-টু-স্পিচ নেই। Android Chrome ব্যবহার করে দেখুন।');
+    return;
+  }
+  const synth = window.speechSynthesis;
+  synth.cancel();
+  const utterance = new SpeechSynthesisUtterance(String(text || ''));
+  utterance.lang = 'pt-PT';
+  utterance.rate = 0.82;
+  utterance.pitch = 1;
+  utterance.volume = 1;
+
+  const chooseVoiceAndSpeak = () => {
+    const voices = synth.getVoices() || [];
+    // Prefer Portugal Portuguese, then any Portuguese voice. Keep pt-PT lang
+    // even when the device has no dedicated Portuguese voice installed.
+    const voice = voices.find(v => (v.lang || '').toLowerCase() === 'pt-pt')
+      || voices.find(v => (v.lang || '').toLowerCase().startsWith('pt-'));
+    if (voice) utterance.voice = voice;
+    synth.speak(utterance);
+  };
+
+  // Some mobile browsers populate voices asynchronously.
+  const voices = synth.getVoices();
+  if (voices && voices.length) {
+    chooseVoiceAndSpeak();
+  } else {
+    let started = false;
+    const begin = () => {
+      if (started) return;
+      started = true;
+      synth.removeEventListener?.('voiceschanged', begin);
+      chooseVoiceAndSpeak();
+    };
+    synth.addEventListener?.('voiceschanged', begin, { once: true });
+    // Avoid waiting forever on browsers that never fire voiceschanged.
+    setTimeout(begin, 500);
+  }
 }
 function renderCard(){const list=visibleWords();if(!list.length){$('flash-pt').textContent='শব্দ পাওয়া যায়নি';$('flash-pron').textContent='';$('flash-bn').textContent='অন্য শব্দ লিখে খুঁজুন';$('card-counter').textContent='০ / ০';return;}cardIndex=(cardIndex+list.length)%list.length;const w=list[cardIndex];$('flash-pt').textContent=w.pt;$('flash-pron').textContent='বাংলা উচ্চারণ: '+w.pron;$('flash-bn').textContent=w.bn;$('card-counter').textContent=digits(cardIndex+1)+' / '+digits(list.length);$('word-total').textContent=digits(raw.length)+'টি শব্দ';$('word-category').textContent=categories[deck]||'সব শব্দ';}
 function move(n){const list=visibleWords();if(list.length){cardIndex=(cardIndex+n+list.length)%list.length;renderCard();}}
