@@ -5,6 +5,9 @@ let deck='all', cardIndex=0, quizIndex=0, score=0, answered=false, searchTerm=''
 const $=id=>document.getElementById(id);
 const digits=n=>String(n).replace(/\d/g,d=>'০১২৩৪৫৬৭৮৯'[+d]);
 const categories={all:'সব ১০৯টি শব্দ',greeting:'শুভেচ্ছা',basic:'প্রাথমিক শব্দ',people:'মানুষ ও পরিচয়',questions:'প্রশ্নবোধক',food:'খাবার ও পানীয়',home:'বাড়ি',travel:'যাতায়াত',time:'সময়',verbs:'ক্রিয়া',work:'কাজ'};
+const ipaPT={
+'Olá':'/ɔˈla/','Bom dia':'/bõ ˈdi.ɐ/','Boa tarde':'/ˈbo.ɐ ˈtaɾ.dɨ/','Boa noite':'/ˈbo.ɐ ˈnoj.tɨ/','Adeus':'/ɐˈdewʃ/','Até logo':'/ɐˈtɛ ˈlo.ɣu/','Até amanhã':'/ɐˈtɛ ɐ.mɐˈɲɐ̃/','Por favor':'/puɾ fɐˈvoɾ/','Obrigado':'/u.bɾiˈɣa.du/','Obrigada':'/u.bɾiˈɣa.dɐ/','Sim':'/sĩ/','Não':'/nɐ̃w̃/','Eu':'/ew/','Tu':'/tu/','Você':'/vuˈse/','Ele':'/ˈɛ.lɨ/','Ela':'/ˈɛ.lɐ/','Nós':'/nɔʃ/','Vocês':'/vuˈseʃ/','Quem':'/kɐ̃j̃/','O quê':'/u ˈke/','Onde':'/ˈõ.dɨ/','Quando':'/ˈkwɐ̃.du/','Como':'/ˈko.mu/','Porquê':'/puɾˈke/','Água':'/ˈa.ɣwɐ/','Pão':'/pɐ̃w̃/','Leite':'/ˈlɐj.tɨ/','Café':'/kɐˈfɛ/','Chá':'/ʃa/','Sumo':'/ˈsu.mu/','Arroz':'/ɐˈʁoʃ/','Frango':'/ˈfɾɐ̃.ɡu/','Peixe':'/ˈpɐj.ʃɨ/','Carne':'/ˈkaɾ.nɨ/','Maçã':'/mɐˈsɐ̃/','Banana':'/bɐˈnɐ.nɐ/','Casa':'/ˈka.zɐ/','Quarto':'/ˈkwaɾ.tu/','Cozinha':'/kuˈzi.ɲɐ/','Porta':'/ˈpɔɾ.tɐ/','Janela':'/ʒɐˈnɛ.lɐ/','Cama':'/ˈkɐ.mɐ/','Mesa':'/ˈme.zɐ/','Cadeira':'/kɐˈdɐj.ɾɐ/','Chave':'/ˈʃa.vɨ/','Rua':'/ˈʁu.ɐ/','Cidade':'/siˈða.dɨ/','Estação':'/ɨʃ.tɐˈsɐ̃w̃/','Comboio':'/kõˈboj.u/','Autocarro':'/ɐw.tuˈka.ʁu/','Metro':'/ˈmɛ.tɾu/','Táxi':'/ˈta.ksi/','Aeroporto':'/ɐ.ɛ.ɾuˈpɔɾ.tu/','Bilhete':'/biˈʎɛ.tɨ/','Esquerda':'/ɨʃˈkeɾ.dɐ/','Direita':'/diˈɾɐj.tɐ/','Hoje':'/ˈo.ʒɨ/','Amanhã':'/ɐ.mɐˈɲɐ̃/','Ontem':'/ˈõ.tɐ̃j̃/','Agora':'/ɐˈɣɔ.ɾɐ/','Cedo':'/ˈse.du/','Tarde':'/ˈtaɾ.dɨ/','Manhã':'/mɐˈɲɐ̃/','Noite':'/ˈnoj.tɨ/','Ser':'/seɾ/','Estar':'/ɨʃˈtaɾ/','Ter':'/teɾ/','Ir':'/iɾ/','Vir':'/viɾ/','Fazer':'/fɐˈzeɾ/','Querer':'/kɨˈɾeɾ/','Poder':'/puˈðeɾ/','Falar':'/fɐˈlaɾ/','Comer':'/kuˈmeɾ/','Beber':'/bɨˈbeɾ/','Viver':'/viˈveɾ/','Trabalhar':'/tɾɐ.bɐˈʎaɾ/','Estudar':'/ɨʃ.tuˈðaɾ/','Aprender':'/ɐ.pɾɐ̃ˈdeɾ/','Perceber':'/pɨɾ.sɨˈbeɾ/','Gostar':'/ɡuʃˈtaɾ/','Precisar':'/pɾɨ.siˈzaɾ/','Abrir':'/ɐˈbɾiɾ/','Fechar':'/fɨˈʃaɾ/','Bom':'/bõ/','Boa':'/ˈbo.ɐ/','Mau':'/maw/','Grande':'/ˈɡɾɐ̃.dɨ/','Pequeno':'/pɨˈke.nu/','Novo':'/ˈno.vu/','Velho':'/ˈvɐ.ʎu/','Quente':'/ˈkẽ.tɨ/','Frio':'/ˈfɾi.u/','Feliz':'/fɨˈliʃ/','Amigo':'/ɐˈmi.ɡu/','Família':'/fɐˈmi.li.ɐ/','Mãe':'/mɐ̃j̃/','Pai':'/paj/','Trabalho':'/tɾɐˈba.ʎu/','Dinheiro':'/diˈɲɐj.ɾu/','Loja':'/ˈlɔ.ʒɐ/','Ajuda':'/ɐˈʒu.dɐ/'
+};
 function visibleWords(){return raw.filter(w=>(deck==='all'||w.cat===deck)&&(!searchTerm||[w.pt,w.pron,w.bn].join(' ').toLowerCase().includes(searchTerm.toLowerCase())));}
 function speak(text){
   // Free browser/device speech only: no API key, external endpoint, or network request.
@@ -19,6 +22,12 @@ function speak(text){
   utterance.rate = slowPronunciation ? 0.52 : 0.82;
   utterance.pitch = 1;
   utterance.volume = 1;
+  const mouth = document.getElementById('mouth-visual');
+  const audioButton = document.getElementById('pron-speak');
+  utterance.onstart = () => { if (mouth) mouth.classList.add('talking'); if (audioButton) audioButton.classList.add('is-speaking'); };
+  const stopMouth = () => { if (mouth) mouth.classList.remove('talking'); if (audioButton) audioButton.classList.remove('is-speaking'); };
+  utterance.onend = stopMouth;
+  utterance.onerror = stopMouth;
 
   const chooseVoiceAndSpeak = () => {
     const voices = synth.getVoices() || [];
@@ -52,7 +61,7 @@ function speak(text){
     setTimeout(begin, 500);
   }
 }
-function renderCard(){const list=visibleWords();if(!list.length){$('flash-pt').textContent='শব্দ পাওয়া যায়নি';$('flash-pron').textContent='';$('flash-bn').textContent='অন্য শব্দ লিখে খুঁজুন';$('card-counter').textContent='০ / ০';$('pron-word').textContent='—';$('pron-sounds').textContent='';return;}cardIndex=(cardIndex+list.length)%list.length;const w=list[cardIndex];$('flash-pt').textContent=w.pt;$('flash-pron').textContent='বাংলা উচ্চারণ: '+w.pron;$('flash-bn').textContent=w.bn;$('pron-word').textContent=w.pt;$('pron-sounds').textContent=w.pron;$('pron-meaning').textContent=w.bn;$('card-counter').textContent=digits(cardIndex+1)+' / '+digits(list.length);$('word-total').textContent=digits(raw.length)+'টি শব্দ';$('word-category').textContent=categories[deck]||'সব শব্দ';}
+function renderCard(){const list=visibleWords();if(!list.length){$('flash-pt').textContent='শব্দ পাওয়া যায়নি';$('flash-pron').textContent='';$('flash-bn').textContent='অন্য শব্দ লিখে খুঁজুন';$('card-counter').textContent='০ / ০';$('pron-word').textContent='—';$('pron-sounds').textContent='';return;}cardIndex=(cardIndex+list.length)%list.length;const w=list[cardIndex];$('flash-pt').textContent=w.pt;$('flash-pron').textContent='বাংলা উচ্চারণ: '+w.pron;$('flash-bn').textContent=w.bn;$('pron-word').textContent=w.pt;$('pron-sounds').textContent=w.pron;$('pron-meaning').textContent=w.bn;$('pron-ipa').textContent=ipaPT[w.pt]||'IPA ainda não disponível';$('card-counter').textContent=digits(cardIndex+1)+' / '+digits(list.length);$('word-total').textContent=digits(raw.length)+'টি শব্দ';$('word-category').textContent=categories[deck]||'সব শব্দ';}
 function move(n){const list=visibleWords();if(list.length){cardIndex=(cardIndex+n+list.length)%list.length;renderCard();}}
 const quizData=[
 ['“Obrigado” মানে কী?',['ধন্যবাদ','বিদায়','পানি'],0],['“Sim” মানে কী?',['না','হ্যাঁ','হ্যালো'],1],['“Bom dia” কখন বলা হয়?',['সুপ্রভাত','শুভরাত্রি','দুঃখিত'],0],['“Água” মানে কী?',['বাড়ি','বন্ধু','পানি'],2],['“Onde” মানে কী?',['কখন','কোথায়','কেন'],1],['“Comboio” মানে কী?',['ট্রেন','বাস','বিমান'],0],['“Hoje” মানে কী?',['গতকাল','আগামীকাল','আজ'],2],['“Aprender” মানে কী?',['শেখা','খাওয়া','যাওয়া'],0],['“Família” মানে কী?',['দোকান','পরিবার','স্টেশন'],1],['“Por favor” মানে কী?',['দয়া করে','ধন্যবাদ','না'],0],['“Casa” মানে কী?',['বাড়ি','পানি','চাবি'],0],['“Trabalhar” মানে কী?',['ঘুমানো','কাজ করা','বোঝা'],1]
