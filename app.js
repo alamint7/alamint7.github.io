@@ -24,7 +24,11 @@ function speak(text){
     const voices = synth.getVoices() || [];
     // Prefer Portugal Portuguese, then any Portuguese voice. Keep pt-PT lang
     // even when the device has no dedicated Portuguese voice installed.
-    const voice = voices.find(v => (v.lang || '').toLowerCase() === 'pt-pt')
+    // Prefer Google's installed Portuguese (Portugal) voice when available,
+    // then any pt-PT voice, then another Portuguese voice.
+    const voice = voices.find(v => (v.lang || '').toLowerCase() === 'pt-pt' && /google/i.test(v.name || ''))
+      || voices.find(v => (v.lang || '').toLowerCase() === 'pt-pt')
+      || voices.find(v => (v.lang || '').toLowerCase().startsWith('pt-') && /google/i.test(v.name || ''))
       || voices.find(v => (v.lang || '').toLowerCase().startsWith('pt-'));
     if (voice) utterance.voice = voice;
     synth.speak(utterance);
